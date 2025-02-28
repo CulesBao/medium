@@ -4,7 +4,6 @@ type UserEntity = {
   name: string;
   avatar: string;
 }
-
 interface UserService {
   getOne(id: string): Promise<UserEntity>;
   followUser(followingId: string, followerId: string): Promise<void>;
@@ -15,5 +14,5 @@ interface UserService {
 
 export {
   UserEntity,
-  UserService,
+  UserService
 };

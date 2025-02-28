@@ -41,7 +41,6 @@ export default function SearchResults() {
     const [topics, setTopics] = useState<Array<any>>([]);
     const [users, setUsers] = useState<Array<any>>([]);
     const {isAuthenticated} = useAuth();
-
     const {refetch} = useQuery({
         queryFn: () =>
             httpRequest.post(`${url}/search/${apiQuery}/${query}`, {
@@ -55,7 +54,9 @@ export default function SearchResults() {
             else if (tab === "topics") setTopics(response.data);
         },
     });
-
+    posts.forEach((item) => {
+        console.log(item.createdAt)
+    })
     useEffect(() => {
         if (!query || !tab) return;
         setApiQuery("");
@@ -141,16 +142,16 @@ export default function SearchResults() {
                                 showUserList={true}
                                 filterPost={filterPost}
                                 filterAuthorPost={filterAuthorPost}
-                                postId={item.post.id}
-                                timestamp={item.post.createdAt}
-                                title={item.post.title}
+                                postId={item.id}
+                                timestamp={item.createdAt}
+                                title={item.title}
                                 username={item.user.name}
                                 userId={item.user.id}
-                                image={item.post.image}
-                                tag={item.post.tags.at(0)}
+                                image={item.image}
+                                tag={item.tags.at(0)}
                                 userImage={item.user.avatar}
-                                key={item.post.id}
-                                summary={item.post.summary}
+                                key={item.id}
+                                summary={item.summary}
                                 showMuteicon={false}
                             />
                         ))}

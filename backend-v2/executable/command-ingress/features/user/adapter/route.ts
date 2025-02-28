@@ -7,9 +7,9 @@ const setupUserRoute = (controller: UserController) => {
 
     router.get('/:id', controller.getOne.bind(controller));
     router.put('/follow/:id', requireAuthorizedUser, controller.followUser.bind(controller))
-    // router.delete('/:id/unfollow', controller.unfollowUser.bind(controller))
-    // router.get('/:id/followers', controller.getFollowers.bind(controller))
-    // router.get('/:id/following', controller.getFollowing.bind(controller))
+    router.put('/unfollow/:id', requireAuthorizedUser, controller.unfollowUser.bind(controller))
+    router.get('/:id/followers', controller.getFollowers.bind(controller))
+    router.get('/:id/following', controller.getFollowing.bind(controller))
     return router;
 }
 

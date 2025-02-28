@@ -13,6 +13,7 @@ const postSchema = new Schema(
     author: {
       type: Schema.Types.ObjectId,
       required: true,
+      ref: 'users',
     },
     tags: [{ type: String, required: true }],
     image: String,
