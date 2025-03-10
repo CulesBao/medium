@@ -1,3 +1,4 @@
+import client from '../../../../../cdc/redisConnection';
 import Post from '../../../../../internal/model/post';
 import User from '../../../../../internal/model/user';
 import { PostEntity, PostCreationDto, PostService } from '../types';
@@ -62,19 +63,11 @@ export class PostServiceImpl implements PostService {
     };
   }
   async fetchPostsByUser(id: string): Promise<PostEntity[]> {
-    const results = await Post.find({ author: id })
-      .lean(true);
-
-    return results.map(r => ({
-      id: String(r._id),
-      title: String(r.title || ''),
-      markdown: r.markdown,
-      image: r.image,
-      authorID: id,
-      tags: r.tags,
-      summary: String(r.summary || ''),
-      createdAt: Number(r.createdAt),
-    }));
+    let posts = await client.zRange(`user:${id}:following-feeds`, 0, -1)
+    const feeds = posts.map((post: string) => JSON.parse(post))
+    if (!posts)
+      throw new Error('No feeds')
+    return feeds as PostEntity[]
   }
 
   async createPost(postCreationDto: PostCreationDto): Promise<PostEntity> {

@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb"
+import { PostEntity } from "../executable/command-ingress/features/post/types"
 
 export type ChangePostCapture = {
-    authorId: string,
     timeStamp: number,
     followers: ObjectId[]
-    postId: ObjectId
+    post: PostEntity
 }

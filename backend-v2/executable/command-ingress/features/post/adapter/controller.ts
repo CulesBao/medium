@@ -84,6 +84,7 @@ export class PostController extends BaseController {
   async deletePost(req: HttpRequest, res: Response, next: NextFunction): Promise<void> {
     await this.execWithTryCatchBlock(req, res, next, async (req, res, _next) => {
       const id = req.params.id;
+      console.log(id)
       await this.service.deletePost(id);
 
       res.status(204);

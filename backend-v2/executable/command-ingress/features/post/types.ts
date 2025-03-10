@@ -20,6 +20,7 @@ type PostEntity = {
   author?: UserEntity;
 }
 
+
 interface PostService {
   createPost(postCreationDto: PostCreationDto): Promise<PostEntity>;
   fetchPostsByUser(id: string): Promise<PostEntity[]>;

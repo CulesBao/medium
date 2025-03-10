@@ -5,6 +5,7 @@ const client = createClient({
 })
 
 client.on('connect', async() => {
+    client.flushAll()
     console.log('Redis client connected');
 });
 

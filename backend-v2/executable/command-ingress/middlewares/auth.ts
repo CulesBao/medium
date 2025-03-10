@@ -12,7 +12,7 @@ const requireAuthorizedUser = (req: HttpRequest, res: Response, next: NextFuncti
       res.sendStatus(401);
       return;
     }
-
+    console.log(jwtToken)
     const payload = jwt.verify(jwtToken, env.JWT_SECRET);
 
     if (!payload.sub) {

@@ -58,6 +58,7 @@ const createHttpServer = (redisClient: any) => {
   app.use('/post', initPostRoute(new PostController(postService)));
   app.use('/users', initUserRoute(new UserController(userService)));
   app.use('/search', initSearchRoute(new SearchController(searchService)));
+  
 
   app.use(recoverMiddleware);
 

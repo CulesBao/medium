@@ -1,17 +1,11 @@
-import { Db, ObjectId } from "mongodb";
+import { ObjectId } from "mongodb";
 import { IOperator } from "./IOperator";
 import { ChangePostCapture } from "../type";
 import user from "../../internal/model/user";
+import { PostEntity } from "../../executable/command-ingress/features/post/types";
+import { UserEntity } from "../../executable/command-ingress/features/user/types";
 
 export class OperatorImpl implements IOperator {
-    db: Db
-    collectionName: string
-    collection
-    constructor(collectionName: string, db: Db) {
-        this.collectionName = collectionName
-        this.db = db
-        this.collection = this.db.collection(this.collectionName)
-    }
     async run(data: any): Promise<ChangePostCapture> {
         if (!this.isNewPost(data))
             return
@@ -26,16 +20,16 @@ export class OperatorImpl implements IOperator {
             return followerId
         })
         const timeStamp = new Date(data.fullDocument.createdAt).getTime()
-        const postId = data.fullDocument._id
+        const document = data.fullDocument as PostEntity
+        document.author = author as UserEntity
         return {
-            authorId, 
-            postId,
             followers,
             timeStamp,
+            post: document
         }
     }
     private isNewPost(data: any): boolean {
-        const author = data.fullDocument.author
+        const author = data.fullDocument?.author
         const operationType = data.operationType
         return author && operationType == "insert"
     }

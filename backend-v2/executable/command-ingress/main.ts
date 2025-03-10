@@ -18,12 +18,10 @@ async function start() {
     await mongoose.connect(env.MONGO_URI);
     const redisClient = client;
     const server = createHttpServer(redisClient);
-    const mongoClient = await MongoClient.connect(process.env.MONGO_URI)
-    const db = mongoClient.db('medium-clone')
     const sink: ISink = new SinkImpl(client)
-    const source: ISource = new SourceImpl('posts', client)
+    const source: ISource = new SourceImpl()
     const operator: IOperator[] = []
-    operator.push(new OperatorImpl('users', db))
+    operator.push(new OperatorImpl())
     const pipeline = new Pipeline(sink, source, operator)
 
     console.log('Pipeline run')
@@ -32,7 +30,7 @@ async function start() {
         console.log(`Server running on port ${env.PORT}`);
     });
     // Graceful shutdown
-    process.on('SIGINT', async() => {
+    process.on('SIGINT', async () => {
         // redisClient.quit();
         await client.disconnect();
         // Avoid connection leak.

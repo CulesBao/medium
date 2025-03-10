@@ -2,32 +2,33 @@ import { EventEmitter } from "stream";
 import { ISource } from "./ISource";
 import client from "../redisConnection";
 import post from "../../internal/model/post";
+
 export class SourceImpl implements ISource {
-    collectionName: string
-    client: typeof client
-    constructor(collectionName: string, redis: typeof client) {
-        this.collectionName = collectionName
-        this.client = redis
-    }   
     async get(): Promise<EventEmitter> {
-        let watchOption: any = {}
-        const eventEmitter = new EventEmitter()
-        let resumeToken = await client.get('RESUME_TOKEN')
-        if (resumeToken)
-            watchOption.resumeAfter = { _data: resumeToken }  
-        const changeStream = post.watch([], {
-            resumeAfter: resumeToken
-        })
+        const eventEmitter = new EventEmitter();
+        const resumeTokenString = await client.get("RESUME_TOKEN");
+        let changeStream;
+        let resumeToken;
+        try {
+            resumeToken = JSON.parse(resumeTokenString);
+        } catch (error) {
+            throw new Error("Invalid resume token format in Redis");
+        }
+        if (resumeToken === null) {
+            changeStream = post.watch();
+        } else {
+        changeStream = post.watch([], { resumeAfter: resumeToken });
+        }
 
-        changeStream.on('change', async (dataChanged: any) => {
+        changeStream.on("change", async (dataChanged: any) => {
             if (dataChanged && dataChanged.operationType) {
-                eventEmitter.emit('change', dataChanged)
-                await client.set('RESUME_TOKEN', dataChanged._id._data)
+                eventEmitter.emit("change", dataChanged);
+                await client.set("RESUME_TOKEN", JSON.stringify(dataChanged._id));
             }
-        }).once('error', err => {
-            console.log(err)
-        })
+        }).once("error", (err) => {
+            console.log(err);
+        });
 
-        return eventEmitter
+        return eventEmitter;
     }
 }
