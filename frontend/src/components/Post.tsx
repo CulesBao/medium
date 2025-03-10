@@ -83,7 +83,7 @@ export default function Post({
     setAnchorEl(null);
   };
 
-  console.log('Timestamp: ', timestamp);
+  console.log("Timestamp: ", timestamp);
 
   return (
     <div
@@ -130,7 +130,7 @@ export default function Post({
             }}
           >
             <ReactTimeAgo
-              date={Number.parseInt(timestamp)}
+              date={new Date(timestamp)} // Thay vì parseInt, hãy dùng Date
               locale="en-US"
               timeStyle="round"
             />

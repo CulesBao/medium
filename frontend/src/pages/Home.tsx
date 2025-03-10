@@ -13,7 +13,7 @@ import UnAuthHome from "./UnAuthHome";
 
 export default function Home() {
   const { tag } = useParams();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   return !isAuthenticated && !tag ? (
     <UnAuthHome />
   ) : (
@@ -22,11 +22,11 @@ export default function Home() {
 }
 
 function HomeContainer({ tag }: { tag: string }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [posts, setposts] = useState<Array<any>>([]);
   document.title = "Medium";
   useQuery({
-    queryFn: () => httpRequest.get(`${url}/post/home`),
+    queryFn: () => httpRequest.get(`${url}/post/users/${user?.id}`),
     queryKey: ["home", "no"],
     enabled: tag == undefined,
     onSuccess: (data) => {
@@ -36,7 +36,7 @@ function HomeContainer({ tag }: { tag: string }) {
   useQuery({
     queryFn: () =>
       httpRequest.get(
-        `${url}/post/${tag === "Following" ? "users" : "topic"}/${tag}`
+        `${url}/post/${tag === `${user?.id}` ? "users" : "topic"}/${tag}`
       ),
     queryKey: ["home", "topic", tag],
     enabled: tag != undefined,
@@ -44,7 +44,6 @@ function HomeContainer({ tag }: { tag: string }) {
       setposts(data.data);
     },
   });
-
   function filterPost(postId: string) {
     setposts((prev) => prev.filter((item) => item.post.id !== postId));
   }
@@ -89,16 +88,16 @@ function HomeContainer({ tag }: { tag: string }) {
                 showUserList={true}
                 filterPost={filterPost}
                 filterAuthorPost={filterAuthorPost}
-                postId={item.post.id}
-                timestamp={item.post.createdAt}
-                title={item.post.title}
+                postId={item._id}
+                timestamp={item.createdAt}
+                title={item.title}
                 username={item.author?.name}
-                userId={item.author?.id}
-                image={item.post.image}
-                tag={item.post.tags.at(0)}
+                userId={item.author?._id}
+                image={item.image}
+                tag={item.tags.at(0)}
                 userImage={item.author?.avatar}
-                key={item.post.id}
-                summary={item.post.summary}
+                key={item.id}
+                summary={item.summary}
               />
             );
           })}
