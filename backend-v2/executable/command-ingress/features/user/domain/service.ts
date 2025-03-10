@@ -1,42 +1,79 @@
 import { UserEntity, UserService } from '../types';
 import UserModel from '../../../../../internal/model/user';
-
 export class UserServiceImpl implements UserService {
   async followUser(followingId: string, followerId: string): Promise<void> {
-    const followingUser = await UserModel.findById(followingId);
-    const followerUser = await UserModel.findById(followerId);
-    if (!followingUser || !followerUser) {
-      throw new Error('User not found');
-    }
-    if (followingUser.followers.includes(followerUser._id) || followerUser.followings.includes(followingUser._id)) {
-      throw new Error('User already followed');
-    }
-    followingUser.followers.push(followerUser._id);
-    followerUser.followings.push(followingUser._id);
-    await followingUser.save();
-    await followerUser.save();
+    const session = await UserModel.startSession();
+    session.startTransaction();
+    await UserModel.updateOne(
+      {
+        _id: followingId,
+      },
+      {
+        $addToSet: {
+          followers: followerId,
+        },
+      },
+      {
+        new: true,
+        session: session,
+      }
+    );
+    await UserModel.updateOne(
+      {
+        _id: followerId,
+      },
+      {
+        $addToSet: {
+          followings: followingId,
+        },
+      },
+      {
+        new: true,
+        session: session,
+      }
+    );
+    await session.commitTransaction();
+    session.endSession();
   }
   async unfollowUser(followingId: string, followerId: string): Promise<void> {
-    const followingUser = await UserModel.findById(followingId)
-    const followerUser = await UserModel.findById(followerId)
-    if (!followingUser || !followerUser) {
-      throw new Error('User not found');
-    }
-    if (!followingUser.followers.includes(followerUser._id) || !followerUser.followings.includes(followingUser._id)) {
-      throw new Error('User not followed');
-    }
-    followingUser.followers = followingUser.followers.filter((id) => String(id) != followerId);
-    followerUser.followings = followerUser.followings.filter((id) => String(id) != followingId);
-    console.log(followingUser.followers);
-    console.log(followerUser.followings);
-    await followingUser.save();
-    await followerUser.save();
+    const session = await UserModel.startSession();
+    session.startTransaction();
+    await UserModel.updateOne(
+      {
+        _id: followingId,
+      },
+      {
+        $pull: {
+          followers: followerId,
+        },
+      },
+      {
+        session: session,
+      }
+    );
+    await UserModel.updateOne(
+      {
+        _id: followerId,
+      },
+      {
+        $pull: {
+          followings: followingId,
+        },
+      },
+      {
+        session: session,
+      }
+    );
+    await session.commitTransaction();
+    session.endSession();
   }
   async getFollowers(id: string): Promise<UserEntity[]> {
-    const user = await UserModel.findById(id).populate({
-      path: 'followers',
-      select: 'id email name avatar'
-    }).exec();
+    const user = await UserModel.findById(id)
+      .populate({
+        path: 'followers',
+        select: 'id email name avatar',
+      })
+      .exec();
     if (!user) {
       throw new Error('User not found');
     }
@@ -48,10 +85,12 @@ export class UserServiceImpl implements UserService {
     }));
   }
   async getFollowing(id: string): Promise<UserEntity[]> {
-    const user = await UserModel.findById(id).populate({
-      path: 'followings',
-      select: 'id email name avatar'
-    }).exec();
+    const user = await UserModel.findById(id)
+      .populate({
+        path: 'followings',
+        select: 'id email name avatar',
+      })
+      .exec();
     if (!user) {
       throw new Error('User not found');
     }
@@ -72,5 +111,4 @@ export class UserServiceImpl implements UserService {
       email: String(user.email),
     };
   }
-
 }
