@@ -63,7 +63,7 @@ export class PostServiceImpl implements PostService {
     };
   }
   async fetchPostsByUser(id: string): Promise<PostEntity[]> {
-    let posts = await client.zRange(`user:${id}:following-feeds`, 0, -1)
+    let posts = await client.zRange(`user:${id}:following-feeds`, 0, -1,{REV: true})
     const feeds = posts.map((post: string) => JSON.parse(post))
     if (!posts)
       throw new Error('No feeds')
@@ -84,7 +84,7 @@ export class PostServiceImpl implements PostService {
       tags: postCreationDto.tags,
       summary: summary,
     });
-
+      
     return {
       id: String(insertResult._id),
       image: String(insertResult.image),
@@ -96,6 +96,4 @@ export class PostServiceImpl implements PostService {
       createdAt: Number(insertResult.createdAt),
     }
   }
-
-
 }

@@ -12,15 +12,12 @@ import { OperatorImpl } from "./operator/OperatorImpl"
 config()
 async function main() {
     try {
-        const mongoClient = await MongoClient.connect(process.env.MONGO_URI)
-        const db = mongoClient.db('posts')
         const sink: ISink = new SinkImpl(client)
-        const source: ISource = new SourceImpl('posts', db, client)
+        const source: ISource = new SourceImpl()
         const operator: IOperator[] = []
-        operator.push(new OperatorImpl(db, 'posts'))
+        operator.push(new OperatorImpl())
         const pipeline = new Pipeline(sink, source, operator)
 
-        console.log('Pipeline run')
         await pipeline.run()
     }
     catch (err) {

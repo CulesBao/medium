@@ -122,7 +122,7 @@ export default function User() {
       setUserData([]);
     };
   }, [data?.data, tab]);
-
+  
   function filterPost(postId: string) {
     setposts((prev) => prev.filter((item) => item.id !== postId));
   }
